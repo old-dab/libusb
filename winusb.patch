@@ -1,0 +1,26 @@
+--- windows_winusb.c	2021-02-08 20:56:14.000000000 +0100
++++ windows_winusb.c	2021-02-24 14:32:58.000000000 +0100
+@@ -3022,6 +3022,7 @@
+ 	OVERLAPPED *overlapped;
+ 	BOOL ret;
+ 	int current_interface;
++	static UCHAR policy = 0;
+ 
+ 	CHECK_WINUSBX_AVAILABLE(sub_api);
+ 
+@@ -3038,6 +3039,15 @@
+ 	overlapped = get_transfer_priv_overlapped(itransfer);
+ 
+ 	if (IS_XFERIN(transfer)) {
++		if(policy == 0)
++		{
++			policy = 1;
++			if (!WinUSBX[sub_api].SetPipePolicy(winusb_handle, transfer->endpoint,
++												RAW_IO, sizeof(UCHAR), &policy))
++			{
++				usbi_err(TRANSFER_CTX(transfer), "Failed to enable RAW_IO for endpoint %02X", transfer->endpoint);
++			}
++		}
+ 		usbi_dbg("reading %d bytes", transfer->length);
+ 		ret = WinUSBX[sub_api].ReadPipe(winusb_handle, transfer->endpoint, transfer->buffer, transfer->length, NULL, overlapped);
+ 	} else {

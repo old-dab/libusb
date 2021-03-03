@@ -1,0 +1,4 @@
+DAB decoders using librtlsdr sometimes have drop outs with Windows 10. Libusb's bulk-in transfer seems to be not fast enough.
+I found this issue: https://github.com/libusb/libusb/issues/490
+Unfortunately, libusb has no function to set pipe policy to RAW_IO. So i made a patch. It sets the pipe policy to RAW_IO just before the first read.
+
